@@ -3,7 +3,7 @@ Outil d'optimisation des combinaisons Armure-Kit (Dreadcast)
 
 Mise à jour : 17/01/2025
 
-[Informations HRP] Cet outil a pour but de vous proposer une combinaison équipements-kit selon les statistiques que vous souhaitez améliorer. Vous pouvez télécharger le fichier DREADKIT.html en cliquant sur "dowload raw file" et l'ouvrir avec le navigateur de votre choix.
+[Informations HRP] Cet outil a pour but de vous proposer une combinaison équipements-kit selon les statistiques que vous souhaitez améliorer. Vous pouvez télécharger le fichier DREADKIT.html en cliquant sur "download raw file" et l'ouvrir avec le navigateur de votre choix.
 
 Pour un résultat optimal, il vous est conseillé de sélectionner au moins deux statistiques à optimiser, même vous si vous souhaitez n'en améliorer qu'une; cela permettra à l'algorithme de vous proposer des bonus en statistiques "collatéraux" utiles votre style de jeu (Ex : Force en priorité "Maximale" et Agilité en priorité "Basse").
 
