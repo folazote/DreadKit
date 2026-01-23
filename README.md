@@ -1,7 +1,7 @@
 # DreadKit
 Outil d'optimisation des combinaisons Armure-Kit (Dreadcast)
 
-Mise à jour : 17/01/2025
+Mise à jour : 23/01/2025
 
 [Informations HRP] Cet outil a pour but de vous proposer une combinaison équipements-kit selon les statistiques que vous souhaitez améliorer. Vous pouvez télécharger le fichier DREADKIT.html en cliquant sur "download raw file" et l'ouvrir avec le navigateur de votre choix.
 
