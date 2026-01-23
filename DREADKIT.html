@@ -4449,54 +4449,101 @@
 
         function optimizeKitsForEquipment(equipment, availableKits, priorityStats, statPriorities) {
             const techPoints = equipment.techPoints;
-            let remainingPoints = techPoints;
-            const selectedKits = [];
-            let hasRacialKit = false;
-
-            // D'abord, installer un kit racial à 0 coût s'il y en a un
+            
+            // Toujours inclure le kit racial s'il existe
             const racialKit = availableKits.find(kit => kit.cost === 0);
-            if (racialKit && !hasRacialKit) {
-                selectedKits.push({ kit: racialKit, quantity: 1 });
-                hasRacialKit = true;
-            }
-
-            // Ensuite, optimiser avec les autres kits
+            const baseKits = racialKit ? [{ kit: racialKit, quantity: 1 }] : [];
+            
+            // Kits payants disponibles
             const regularKits = availableKits.filter(kit => kit.cost > 0);
             
-            // Trier les kits par efficacité (stats recherchées pondérées par priorité / coût)
-            const sortedKits = regularKits.map(kit => {
-                let weightedStats = 0;
-                Object.entries(kit.stats).forEach(([stat, value]) => {
-                    if (priorityStats.includes(stat)) {
-                        const priority = statPriorities[stat] || 1;
-                        // Multiplier la valeur par la priorité
-                        weightedStats += value * priority;
-                    }
-                    // Les stats non recherchées sont complètement ignorées
-                });
-                return {
-                    kit: kit,
-                    efficiency: kit.cost > 0 ? weightedStats / kit.cost : weightedStats
-                };
-            }).sort((a, b) => b.efficiency - a.efficiency);
-
-            // Algorithme glouton pour remplir les points tech
-            sortedKits.forEach(({ kit }) => {
-                if (kit.cost <= remainingPoints && kit.cost > 0) {
-                    const maxQuantity = Math.floor(remainingPoints / kit.cost);
-                    if (maxQuantity > 0) {
-                        const existing = selectedKits.find(sk => sk.kit.id === kit.id);
-                        if (existing) {
-                            existing.quantity += maxQuantity;
+            // Fonction pour calculer le score d'une combinaison
+            function calculateCombinationScore(combination) {
+                let primaryScore = 0;
+                let secondaryScore = 0;
+                
+                combination.forEach(({ kit, quantity }) => {
+                    Object.entries(kit.stats).forEach(([stat, value]) => {
+                        const totalValue = value * quantity;
+                        
+                        if (priorityStats.includes(stat)) {
+                            const priority = statPriorities[stat] || 1;
+                            
+                            if (priority === 3) { // Essentiel
+                                primaryScore += totalValue * 10;
+                            } else if (priority === 2) { // Important
+                                primaryScore += totalValue * 5;
+                            } else { // Normal
+                                primaryScore += totalValue * 2;
+                            }
                         } else {
-                            selectedKits.push({ kit: kit, quantity: maxQuantity });
+                            // Bonus léger pour les stats non prioritaires positives
+                            if (totalValue > 0) {
+                                secondaryScore += totalValue * 0.1;
+                            }
+                            // Pénalité pour les stats négatives non prioritaires
+                            if (totalValue < 0) {
+                                secondaryScore += totalValue * 0.5;
+                            }
                         }
-                        remainingPoints -= kit.cost * maxQuantity;
+                    });
+                });
+                
+                return { primaryScore, secondaryScore };
+            }
+            
+            // Générer récursivement toutes les combinaisons possibles
+            function generateCombinations(kits, currentIndex, currentCombination, currentCost, maxCost) {
+                // Si on a testé tous les kits, enregistrer cette combinaison
+                if (currentIndex >= kits.length) {
+                    return [currentCombination];
+                }
+                
+                const combinations = [];
+                const kit = kits[currentIndex];
+                const maxQuantity = Math.floor((maxCost - currentCost) / kit.cost);
+                
+                // Tester toutes les quantités possibles pour ce kit (0 à maxQuantity)
+                for (let qty = 0; qty <= maxQuantity; qty++) {
+                    const newCombination = [...currentCombination];
+                    if (qty > 0) {
+                        newCombination.push({ kit: kit, quantity: qty });
                     }
+                    const newCost = currentCost + (kit.cost * qty);
+                    
+                    // Continuer avec le kit suivant
+                    const subCombinations = generateCombinations(kits, currentIndex + 1, newCombination, newCost, maxCost);
+                    combinations.push(...subCombinations);
+                }
+                
+                return combinations;
+            }
+            
+            // Générer toutes les combinaisons possibles
+            const allCombinations = generateCombinations(regularKits, 0, [], 0, techPoints);
+            
+            // Trouver la meilleure combinaison
+            let bestCombination = baseKits;
+            let bestPrimaryScore = -Infinity;
+            let bestSecondaryScore = -Infinity;
+            
+            allCombinations.forEach(combination => {
+                // Ajouter le kit racial à chaque combinaison
+                const fullCombination = [...baseKits, ...combination];
+                const { primaryScore, secondaryScore } = calculateCombinationScore(fullCombination);
+                
+                // Une combinaison est meilleure si:
+                // 1. Elle a un meilleur score primaire
+                // 2. À score primaire égal, elle a un meilleur score secondaire
+                if (primaryScore > bestPrimaryScore || 
+                    (primaryScore === bestPrimaryScore && secondaryScore > bestSecondaryScore)) {
+                    bestPrimaryScore = primaryScore;
+                    bestSecondaryScore = secondaryScore;
+                    bestCombination = fullCombination;
                 }
             });
-
-            return selectedKits;
+            
+            return bestCombination;
         }
 
         function displayOptimizationResults(optimization, totalStats, selectedStats, playerAccomplishments) {
