@@ -1,5 +1,6 @@
 # DreadKit
 Outil d'optimisation des combinaisons équipements-kits
+
 Mise à jour : 26/03/2026
 
 [Informations HRP] Cet outil a pour but de vous proposer une combinaison équipements-kit selon les statistiques que vous souhaitez améliorer. Vous pouvez y accéder depuis la page https://folazote.github.io/DreadKit. Vous pouvez également y accéder en téléchargeant le fichier "dreadkit.html" et en l'ouvrant avec le navigateur de votre choix.
